@@ -1,74 +1,120 @@
 package api
 
-/*
-const (
-	testPort      = "4242"
-	testSSLEnable = "TRUE"
-	testSSLCert   = "certificates/cert.pem"
-	testSSLKey    = "certificates/key.pem"
-	testJWTKey    = "jwt-key"
+import (
+	"testing"
+
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
-var privateEnv = map[string]string{
-	"SERVER_PORT":            testPort,
-	"SERVER_SSL_ENABLE":      testSSLEnable,
-	"SERVER_SSL_CERTIFICATE": testSSLCert,
-	"SERVER_SSL_KEY":         testSSLKey,
-	"SERVER_JWT_KEY":         testJWTKey,
-}
+func TestConfig(t *testing.T) {
+	portVal := "4242"
+	sslEnableVal := "true"
+	sslCertVal := "certificates/cert.pem"
+	sslKeyVal := "certificates/key.pem"
+	swaggerVal := "true"
 
-var defaultEnv = privateEnv
+	t.Run("should return the config with prefix", func(t *testing.T) {
+		prefix := "APP"
+		ConfigurationPrefix = prefix
 
-func setenv() error {
-	var err error
-	for key, value := range defaultEnv {
-		if err = os.Setenv(key, value); err != nil {
-			return err
+		prefix += "_"
+		viper.Set(prefix+CONF_HTTP_PORT, portVal)
+		viper.Set(prefix+CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(prefix+CONF_HTTP_CERT, sslCertVal)
+		viper.Set(prefix+CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(prefix+CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
+
+		config, err := config()
+		if assert.NoError(t, err) {
+			assert.EqualValues(t, portVal, config.Port)
+			assert.True(t, config.SSL.Enable)
+			assert.EqualValues(t, sslCertVal, config.SSL.Cert)
+			assert.EqualValues(t, sslKeyVal, config.SSL.Key)
+			assert.True(t, config.Swagger)
 		}
-	}
-	return nil
-}
+	})
+	t.Run("should return the config without prefix", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
 
-func unsetenv() error {
-	var err error
-	for value := range defaultEnv {
-		if err = os.Unsetenv(value); err != nil {
-			return err
+		config, err := config()
+		if assert.NoError(t, err) {
+			assert.EqualValues(t, portVal, config.Port)
+			assert.True(t, config.SSL.Enable)
+			assert.EqualValues(t, sslCertVal, config.SSL.Cert)
+			assert.EqualValues(t, sslKeyVal, config.SSL.Key)
+			assert.True(t, config.Swagger)
 		}
-	}
-	return nil
-}
+	})
+	t.Run("should return an error when missing port", func(t *testing.T) {
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
 
-func TestNewConfig(t *testing.T) {
-	// should return an error because envconfig Process failed
-	func() {
-		// init
-		appName := "WRONG_APP_NAME"
-		expectedError := "required key WRONG_APP_NAME_SSL_ENABLE missing value"
-		c, err := NewConfig(appName)
-
-		// assert
+		config, err := config()
 		if assert.Error(t, err) {
-			assert.Zero(t, c)
-			assert.Equal(t, expectedError, err.Error())
+			assert.ErrorIs(t, err, ErrMissingConfig)
+			assert.Empty(t, config)
 		}
-	}()
+	})
+	t.Run("should return an error when missing ssl", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
 
-	// default: should be ok
-	func() {
-		// init
-		appName := "Server"
-		assert.NoError(t, setenv())
-		c, err := NewConfig(appName)
-		assert.NoError(t, unsetenv())
-
-		// assert
-		if assert.NotNil(t, c) && assert.NoError(t, err) {
-			assert.Equal(t, testPort, c.Port)
-			assert.Equal(t, testSSLCert, c.SSL.Certificate)
-			assert.Equal(t, testSSLKey, c.SSL.Key)
-			assert.Equal(t, testJWTKey, c.JWTKey)
+		config, err := config()
+		if assert.Error(t, err) {
+			assert.ErrorIs(t, err, ErrMissingConfig)
+			assert.Empty(t, config)
 		}
-	}()
+	})
+	t.Run("should return an error when missing cert", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
+
+		config, err := config()
+		if assert.Error(t, err) {
+			assert.ErrorIs(t, err, ErrMissingConfig)
+			assert.Empty(t, config)
+		}
+	})
+	t.Run("should return an error when missing key", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
+
+		config, err := config()
+		if assert.Error(t, err) {
+			assert.ErrorIs(t, err, ErrMissingConfig)
+			assert.Empty(t, config)
+		}
+	})
+	t.Run("should return an error when missing swagger", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		defer viper.Reset()
+
+		config, err := config()
+		if assert.Error(t, err) {
+			assert.ErrorIs(t, err, ErrMissingConfig)
+			assert.Empty(t, config)
+		}
+	})
 }
-*/

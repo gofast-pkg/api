@@ -1,62 +1,82 @@
 package api
 
-/*
+import (
+	"testing"
+
+	"github.com/labstack/echo/v4"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
+)
+
 func TestNew(t *testing.T) {
-	// should return an error because config can't be loaded
-	func() {
-		// init
-		appName := "WRONG_APP_NAME"
-		expectedError := "required key WRONG_APP_NAME_SSL_ENABLE missing value"
-		s, err := New(appName)
+	portVal := "4242"
+	sslEnableVal := "true"
+	sslCertVal := "certificates/cert.pem"
+	sslKeyVal := "certificates/key.pem"
+	swaggerVal := "true"
 
-		// assert
+	t.Run("should return an error when missing port", func(t *testing.T) {
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
+
+		a, err := New()
 		if assert.Error(t, err) {
-			assert.Zero(t, s)
-			assert.Equal(t, expectedError, err.Error())
+			assert.Nil(t, a)
+			assert.ErrorIs(t, err, ErrMissingConfig)
 		}
-	}()
+	})
+	t.Run("should return the api", func(t *testing.T) {
+		viper.Set(CONF_HTTP_PORT, portVal)
+		viper.Set(CONF_HTTP_SSL, sslEnableVal)
+		viper.Set(CONF_HTTP_CERT, sslCertVal)
+		viper.Set(CONF_HTTP_KEY, sslKeyVal)
+		viper.Set(CONF_HTTP_SWAGGER, swaggerVal)
+		defer viper.Reset()
 
-	// default: should be ok with tls configuration
-	func() {
-		// init
-		appName := "Server"
-		assert.NoError(t, setenv())
-		s, err := New(appName)
-		assert.NoError(t, unsetenv())
-
-		// assert
-		if assert.NotNil(t, s) && assert.NoError(t, err) {
-			assert.Len(t, s.driver.Routes(), 2)
-			// map is unordener, so bad test to check any routes now
-			/*			assert.Equal(t, "GET", (s.driver.Routes())[0].Method)
-						assert.Equal(t, "/ping", (s.driver.Routes())[0].Path)
-						assert.Equal(t, "POST", (s.driver.Routes())[1].Method)
-						assert.Equal(t, "/login", (s.driver.Routes())[1].Path) */
-/*
+		expectedSSL := SSL{
+			Enable: true,
+			Cert:   sslCertVal,
+			Key:    sslKeyVal,
 		}
-	}()
-
-	// default: should be ok without tls configuration
-	func() {
-		// init
-		appName := "Server"
-		envs := map[string]string{"SERVER_PORT": testPort, "SERVER_SSL_ENABLE": "false", "SERVER_JWT_KEY": testJWTKey}
-		defaultEnv = envs
-		assert.NoError(t, setenv())
-		s, err := New(appName)
-		assert.NoError(t, unsetenv())
-		defaultEnv = privateEnv
-
-		// assert
-		if assert.NotNil(t, s) && assert.NoError(t, err) {
-			assert.Len(t, s.driver.Routes(), 2)
-			// map is unordener, so bad test to check any routes now
-			/*			assert.Equal(t, "GET", (s.driver.Routes())[0].Method)
-						assert.Equal(t, "/ping", (s.driver.Routes())[0].Path)
-						assert.Equal(t, "POST", (s.driver.Routes())[1].Method)
-						assert.Equal(t, "/login", (s.driver.Routes())[1].Path)*/
-/*
-				}
-	}()
+		a, err := New()
+		if assert.NoError(t, err) {
+			assert.NotNil(t, a)
+			assert.EqualValues(t, expectedSSL, a.(*api).ssl)
+			assert.EqualValues(t, portVal, a.(*api).port)
+		}
+	})
 }
-*/
+
+func TestNewWithConfig(t *testing.T) {
+	t.Run("should return the api", func(t *testing.T) {
+		c := Config{
+			Port:    "8080",
+			SSL:     SSL{Enable: true},
+			Swagger: true,
+		}
+		expectedSSL := SSL{Enable: true}
+
+		a, err := NewWithConfig(c)
+		if assert.NoError(t, err) {
+			assert.NotNil(t, a)
+			assert.EqualValues(t, expectedSSL, a.(*api).ssl)
+			assert.EqualValues(t, c.Port, a.(*api).port)
+		}
+	})
+}
+
+func TestAPI_SubRouter(t *testing.T) {
+	t.Run("should return the subrouter", func(t *testing.T) {
+		e := echo.New()
+		a := api{driver: e}
+
+		group, err := a.SubRouter("/test", false)
+
+		if assert.NoError(t, err) {
+			assert.NotNil(t, group)
+		}
+	})
+}
