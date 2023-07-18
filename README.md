@@ -1,42 +1,30 @@
 # API
 
-WIP this code come from my previous internal project, links and dependencies are not valid
-Don't use it
+[![Static Badge](https://img.shields.io/badge/project%20use%20codesystem-green?link=https%3A%2F%2Fgithub.com%2Fgofast-pkg%2Fcodesystem)](https://github.com/gofast-pkg/codesystem)
+![Build](https://github.com/gofast-pkg/api/actions/workflows/ci.yml/badge.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/gofast-pkg/api.svg)](https://pkg.go.dev/github.com/gofast-pkg/api)
+[![codecov](https://codecov.io/gh/gofast-pkg/api/branch/main/graph/badge.svg?token=7TCE3QB21E)](https://codecov.io/gh/gofast-pkg/api)
+[![Release](https://img.shields.io/github/release/gofast-pkg/api?style=flat-square)](https://github.com/gofast-pkg/api/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gofast-pkg/api)](https://goreportcard.com/report/github.com/gofast-pkg/api)
+[![codebeat badge](https://codebeat.co/badges/2d3d16b7-86b5-45c2-93e3-1fe94d6edbf8)](https://codebeat.co/projects/github-com-gofast-pkg-api-main)
+[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/gofast-pkg/api/blob/main/LICENSE)
 
-[![Source](https://img.shields.io/badge/git-source-orange.svg?style=flat-square)](https://github.com/ymohl-cl/gopkg/tree/server-release/server)
-[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/ymohl-cl/gopkg/server)
-[![Build Status](https://travis-ci.org/ymohl-cl/gopkg.svg?branch=server-release&style=flat-square)](https://travis-ci.org/ymohl-cl/gopkg)
-[![codecov](https://codecov.io/gh/ymohl-cl/gopkg/branch/server-release/graph/badge.svg?style=flat-square)](https://codecov.io/gh/ymohl-cl/gopkg)
-[![License](http://img.shields.io/badge/license-mit-blue.svg?style=flat-square)](https://raw.githubusercontent.com/ymohl-cl/gopkg/server-release/LICENSE)
+API is a package to provide http server with commons features. The core use the [echo framework](https://echo.labstack.com/).
 
-server package provide a common server http.
-
-## Requirements
-
-Golang 1.12.4 or higher
-
-download the package:
+## Install
 
 ``` bash
-go get -u github.com/ymohl-cl/gopkg/server
-```
-
-environment variables:
-
-``` bash
-export MYAPP_SSL_ENABLE="true"
-export MYAPP_SSL_CERTIFICATE="path_to_certificats/cert.pem"
-export MYAPP_SSL_KEY="path_to_key/key.pem"
-export MYAPP_PORT="4242"
+$> go get github.com/gofast-pkg/api@latest
 ```
 
 ## Usage
 
 ``` Golang
-import "github.com/ymohl-cl/gopkg/server"
+// Read documentation for more details usages
+import "github.com/go-fast/api"
 
 func main() {
-    s, err := server.New("myapp")
+    api, err := server.New()
     if err != nil {
         panic(err)
     }
@@ -46,21 +34,22 @@ func main() {
 }
 ```
 
-## Changelog
+## Contributing
 
-### v1.1.0
+&nbsp;:grey_exclamation:&nbsp; Use issues for everything
 
-Account management
+Read more informations with the [CONTRIBUTING_GUIDE](./.github/CONTRIBUTING.md)
 
-- server provide authentication with jwt token
-- implement user register with postgres (postgres driver is temporary in server package)
-- transaction manage users behaviors
+For all changes, please update the CHANGELOG.txt file by replacing the existant content.
 
-### v1.0.0
+Thank you &nbsp;:pray:&nbsp;&nbsp;:+1:&nbsp;
 
-Initial commit
+<a href="https://github.com/gofast-pkg/api/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=gofast-pkg/api" />
+</a>
 
-- server http with tls in option
-- implement ping default route
-- logs activity is on by default
-- tests and documentation
+Made with [contrib.rocks](https://contrib.rocks).
+
+## Licence
+
+[MIT](https://github.com/gofast-pkg/api/blob/main/LICENSE)
