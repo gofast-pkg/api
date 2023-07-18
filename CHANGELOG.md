@@ -1,11 +1,5 @@
 # CHANGELOG
 
-## v0.0.1
+## v0.0.2
 
-- Implement codesystem
-- Improve unit tests
-- Change loading configuration
-- Improve linter
-- Update License
-- 
-- implement testify to have a http client tester
+- Improve documentation
