@@ -1,6 +1,7 @@
 // Package api: provides a simple way to create a new API
 // This package is a wrapper of echo framework.
 // https://echo.labstack.com/
+// The package api is ready for integration with swagger.
 package api
 
 import (
@@ -29,6 +30,7 @@ type api struct {
 
 // New instance of API.
 // The config is loaded automatically.
+// New method assume that the loader is initialized via viper.
 func New() (API, error) {
 	var c Config
 	var err error

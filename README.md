@@ -21,9 +21,16 @@ $> go get github.com/gofast-pkg/api@latest
 
 ``` Golang
 // Read documentation for more details usages
-import "github.com/go-fast/api"
+// With New(), api assume that you initialize the configuration with viper.
+// Else, call the NewWithConfig() method to get you api instance.
+import (
+    "github.com/spf13/viper"
+    "github.com/go-fast/api"
+)
 
 func main() {
+    viper.AutomaticEnv()
+
     api, err := server.New()
     if err != nil {
         panic(err)
